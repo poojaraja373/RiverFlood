@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="card form-card">
+  <h2>Register Water-Level Reading</h2>
+  <form method="post" action="{{ url_for('register') }}">
+    <label>Location</label>
+    <input name="location" value="{{ payload.location or '' }}" required>
+    {% if errors.location %}<p class="error">{{ errors.location }}</p>{% endif %}
+
+    <label>Water Level (m)</label>
+    <input name="water_level_m" type="number" step="0.01" value="{{ payload.water_level_m or '' }}" required>
+    {% if errors.water_level_m %}<p class="error">{{ errors.water_level_m }}</p>{% endif %}
+
+    <label>Status</label>
+    <select name="status">
+      <option value="Safe">Safe</option>
+      <option value="Warning">Warning</option>
+      <option value="Danger">Danger</option>
+      <option value="Unknown">Unknown</option>
+    </select>
+    {% if errors.status %}<p class="error">{{ errors.status }}</p>{% endif %}
+
+    <label>Recorded At</label>
+    <input name="recorded_at" type="datetime-local" value="{{ payload.recorded_at or '' }}">
+
+    <label>Device ID</label>
+    <input name="device_id" value="{{ payload.device_id or '' }}" required>
+    {% if errors.device_id %}<p class="error">{{ errors.device_id }}</p>{% endif %}
+
+    <button type="submit">Save Reading</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h2>Control Room Dashboard</h2>
+    <p>Live flood monitoring for all river checkpoints.</p>
+  </div>
+  <div class="card status-card">
+    <h3>Records shown</h3>
+    <p class="big-number">{{ count }}</p>
+  </div>
+</section>
+
+<section class="controls">
+  <input id="searchInput" placeholder="Search location or device" />
+  <select id="statusFilter">
+    <option value="">All statuses</option>
+    <option value="Safe">Safe</option>
+    <option value="Warning">Warning</option>
+    <option value="Danger">Danger</option>
+    <option value="Unknown">Unknown</option>
+  </select>
+  <button id="simulateBtn">Simulate Node Reading</button>
+</section>
+
+<section class="table-wrap">
+  <table id="readingsTable">
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Level (m)</th>
+        <th>Status</th>
+        <th>Trend</th>
+        <th>Device</th>
+        <th>Recorded At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for reading in readings %}
+      <tr>
+        <td>{{ reading.location }}</td>
+        <td>{{ reading.water_level_m }}</td>
+        <td>{{ reading.derived_status }}</td>
+        <td>{{ reading.trend }}</td>
+        <td>{{ reading.device_id }}</td>
+        <td>{{ reading.recorded_at }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">No readings yet. Register the first reading or simulate a node reading.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const table = document.getElementById('readingsTable');
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+  function filterRows() {
+    const term = searchInput.value.toLowerCase();
+    const status = statusFilter.value;
+    rows.forEach((row) => {
+      const text = row.textContent.toLowerCase();
+      const matchesTerm = text.includes(term);
+      const matchesStatus = !status || text.includes(status.toLowerCase());
+      row.style.display = matchesTerm && matchesStatus ? '' : 'none';
+    });
+  }
+
+  searchInput.addEventListener('input', filterRows);
+  statusFilter.addEventListener('change', filterRows);
+
+  document.getElementById('simulateBtn').addEventListener('click', async () => {
+    const res = await fetch('/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'North Bank', device_id: 'NODE-01', water_level_m: 2.1 }) });
+    const data = await res.json();
+    if (data.ok) {
+      window.location.reload();
+    }
+  });
+</script>
+{% endblock %}

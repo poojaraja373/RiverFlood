@@ -1,0 +1,18 @@
+body { font-family: Arial, sans-serif; margin:0; background:#f4f8fb; color:#17324d; }
+.topbar { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; background:#0f4c81; color:white; }
+.topbar a { color:white; text-decoration:none; margin-left:12px; }
+main { padding:24px; }
+.hero { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
+.card { background:white; border-radius:12px; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+.status-card { min-width:160px; text-align:center; }
+.big-number { font-size:32px; font-weight:bold; color:#0f4c81; margin:0; }
+.controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+.controls input, .controls select, form input, form select { padding:10px; border:1px solid #b7c7d6; border-radius:8px; min-width:180px; }
+button { background:#0f4c81; color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+.table-wrap { overflow:auto; }
+table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
+th, td { padding:12px; border-bottom:1px solid #e4ebf2; text-align:left; }
+th { background:#eaf4ff; }
+.form-card { max-width:520px; margin:auto; }
+form { display:flex; flex-direction:column; gap:10px; }
+.error { color:#b00020; margin:0; font-size:13px; }

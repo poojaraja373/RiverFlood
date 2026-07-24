@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>River Flood Early Warning</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <nav class="topbar">
+      <h1>River Flood Early Warning System</h1>
+      <div>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('register') }}">Register Reading</a>
+      </div>
+    </nav>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
