@@ -1,5 +1,7 @@
 # River Flood Early-Warning System
 
+Real-time IoT flood monitoring system with continuous water level tracking, alerts, and historical data logging.
+
 This project simulates a simple river flood early-warning system for the SIH 2026 practical assessment. It stores water-level readings, derives a warning status on the server, and presents a control-room dashboard for search, filtering, and review.
 
 ## Problem in two lines
@@ -34,3 +36,4 @@ The current build is a simulation-only prototype. It does not yet connect to rea
 
 ## Screenshots
 Use the running app in a browser to capture screenshots of the dashboard, registration form, and populated table.
+
