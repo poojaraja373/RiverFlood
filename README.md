@@ -1,39 +1,76 @@
-# River Flood Early-Warning System
+# RiverFlood
 
-Real-time IoT flood monitoring system with continuous water level tracking, alerts, and historical data logging.
+RiverFlood is a lightweight Flask-based prototype for monitoring river water levels and presenting them through a simple early-warning dashboard. It demonstrates how sensor-like readings can be validated, processed, and displayed in a practical web application.
 
-This project simulates a simple river flood early-warning system for the SIH 2026 practical assessment. It stores water-level readings, derives a warning status on the server, and presents a control-room dashboard for search, filtering, and review.
+## Overview
+This project simulates a basic flood monitoring workflow where a user can:
+- submit a new water-level reading,
+- validate the data on the server,
+- generate derived alert information,
+- and view recent readings in a dashboard.
 
-## Problem in two lines
-A riverside block needs a simple, low-cost way to monitor river levels continuously and warn residents before flooding becomes dangerous. This project provides a lightweight web-based dashboard and simulator that capture readings, flag risk, and preserve historical trend data.
+It is designed as a demo application for learning, presentation, and prototyping rather than a production-grade deployment.
 
-## Fields and values
-- reading_id: auto-generated integer primary key.
-- location: monitoring point name such as North Bank, South Bank, East Jetty, or West Ford.
-- water_level_m: numeric river level in meters. Valid range is 0 to 12 m. A few awkward sample values are included on purpose, including a missing value and an impossible spike.
-- status: manually entered status from the form, such as Safe, Warning, Danger, or Unknown.
-- recorded_at: timestamp for each reading.
-- device_id: unique device identifier, for example NODE-01.
-- derived_status: server-calculated status from the water level.
-- trend: server-calculated trend from the previous reading.
-- delta_m: change from the previous reading at the same location.
+## Key Features
+- Web form for registering river readings
+- Server-side validation for required fields and input values
+- Automatic classification of alert status:
+  - Safe
+  - Warning
+  - Danger
+- Trend detection based on changes from the previous reading:
+  - Rising
+  - Falling
+  - Stable
+- Dashboard view for reviewing recent readings
+- JSON API endpoints for reading data and simulation
 
-## How the derived figure is calculated
-The dashboard uses the server to calculate:
-- derived_status: Safe below 1.5 m, Warning at 1.5 to 2.99 m, and Danger at 3.0 m or above.
-- trend: Rising when the current reading is more than 0.2 m above the previous reading, Falling when it is more than 0.2 m below, and Stable otherwise.
-- delta_m: current reading minus the previous reading at the same location.
+## Technology Stack
+- Python
+- Flask
+- SQLite
+- HTML, CSS, and Jinja2 templates
 
-## How to run
-1. Install Python 3.10+.
-2. Open the project folder.
-3. Install Flask: pip install flask
-4. Start the app: python app.py
-5. Open http://127.0.0.1:5000/
+## Project Structure
+- app.py: Flask application and database logic
+- templates/: HTML pages for registration and dashboard views
+- static/: CSS styles for the web UI
+- requirements.txt: Python dependencies
+- river_flood.db: local SQLite database file generated at runtime
 
-## What is not finished
-The current build is a simulation-only prototype. It does not yet connect to real hardware or send data over a live network.
+## Installation
+1. Clone the repository
+2. Install the required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the application:
+   ```bash
+   python app.py
+   ```
+4. Open the app in your browser:
+   ```text
+   http://127.0.0.1:5000/
+   ```
 
-## Screenshots
-Use the running app in a browser to capture screenshots of the dashboard, registration form, and populated table.
+## How It Works
+1. A user enters a river reading through the registration form.
+2. The Flask backend validates the input.
+3. The system computes derived values such as alert level, trend, and delta from the previous reading.
+4. The data is saved into SQLite.
+5. The dashboard displays the stored readings in a user-friendly format.
+
+## Alert Logic
+- Safe: water level below 1.5 meters
+- Warning: water level between 1.5 and 2.99 meters
+- Danger: water level of 3.0 meters or higher
+
+## API Endpoints
+- GET /api/readings: returns all stored readings as JSON
+- POST /api/simulate: inserts a simulated reading into the database
+
+## Notes
+- This is a prototype and not connected to real hardware devices.
+- The local SQLite database file is created automatically when the app starts.
+- The project is ideal for demonstrating backend logic, data handling, and simple dashboard UI.
 
