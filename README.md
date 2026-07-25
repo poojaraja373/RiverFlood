@@ -40,7 +40,78 @@ It is designed as a demo application for learning, presentation, and prototyping
 - requirements.txt: Python dependencies
 - river_flood.db: local SQLite database file generated at runtime
 
-## Installation
+## Architecture
+
+### System Flow Diagram
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         CLIENT BROWSER                          │
+│  [Login] → [Signup] → [Dashboard] ← [Register Reading]          │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │ HTTP Request/Response
+                       ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    FLASK APPLICATION                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │   Routes     │  │  Middleware  │  │  Business Logic      │  │
+│  ├──────────────┤  ├──────────────┤  ├──────────────────────┤  │
+│  │ GET /login   │  │ @login_      │  │ normalize_status()   │  │
+│  │ POST /login  │  │  required    │  │ compute_trend()      │  │
+│  │ GET /signup  │  │ session mgmt │  │ build_payload()      │  │
+│  │ POST /signup │  │              │  │ order_readings()     │  │
+│  │ GET /logout  │  │              │  │                      │  │
+│  │ GET /dash... │  │              │  │                      │  │
+│  │ POST /register   │              │                      │  │
+│  │ GET /api/... │  │              │  │                      │  │
+│  │ POST /api/...   │              │                      │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │ SQL Queries
+                       ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    SQLITE DATABASE                              │
+│  ┌──────────────────────┐  ┌──────────────────────────────────┐ │
+│  │  users TABLE         │  │  readings TABLE                  │ │
+│  ├──────────────────────┤  ├──────────────────────────────────┤ │
+│  │ user_id (PK)         │  │ reading_id (PK)                  │ │
+│  │ username (UNIQUE)    │  │ location                         │ │
+│  │ password             │  │ water_level_m                    │ │
+│  └──────────────────────┘  │ status                           │ │
+│                            │ recorded_at                      │ │
+│                            │ device_id                        │ │
+│                            │ derived_status (Safe/Warn/Danger)│ │
+│                            │ trend (Rising/Falling/Stable)    │ │
+│                            │ delta_m (change from previous)   │ │
+│                            └──────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1. **User Login**
+   - User enters credentials on `/login`
+   - Flask validates against `users` table
+   - Session created with `user_id`
+   - Redirect to `/dashboard`
+
+2. **Register Reading**
+   - User submits form on `/register`
+   - Flask validates: location, device_id, water_level_m (0-12m)
+   - Compute: derived_status, trend, delta_m
+   - Insert into `readings` table
+   - Display updated dashboard
+
+3. **View Dashboard**
+   - Query all readings from database
+   - Order by urgency (Danger → Warning → Safe → Unknown)
+   - Display in HTML table with search/filter
+   - Show username in top navigation
+
+4. **API Endpoints**
+   - `/api/readings` - Returns JSON of all readings (requires login)
+   - `/api/simulate` - Accept JSON reading, apply spike detection (requires login)
+
+
 1. Clone the repository
 2. Install the required dependencies:
    ```bash
