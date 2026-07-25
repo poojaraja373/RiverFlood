@@ -12,6 +12,7 @@ This project simulates a basic flood monitoring workflow where a user can:
 It is designed as a demo application for learning, presentation, and prototyping rather than a production-grade deployment.
 
 ## Key Features
+- **User Authentication**: Login system with account creation for secure access
 - Web form for registering river readings
 - Server-side validation for required fields and input values
 - Automatic classification of alert status:
@@ -24,6 +25,7 @@ It is designed as a demo application for learning, presentation, and prototyping
   - Stable
 - Dashboard view for reviewing recent readings
 - JSON API endpoints for reading data and simulation
+- Protected routes - only authenticated users can view dashboard and register readings
 
 ## Technology Stack
 - Python
@@ -53,12 +55,34 @@ It is designed as a demo application for learning, presentation, and prototyping
    http://127.0.0.1:5000/
    ```
 
+## User Authentication
+
+### First Time Login
+When you access the application for the first time, you'll be redirected to the **login page**. A demo account is pre-configured:
+- **Username**: `operator`
+- **Password**: `flood2026`
+
+### Creating a New Account
+If you're a new user:
+1. Click **"Sign up here"** link at the bottom of the login page
+2. Enter a **username** (minimum 3 characters)
+3. Enter a **password** (minimum 6 characters)
+4. Confirm your password
+5. Click **"Create Account"**
+6. You'll be redirected to the login page - login with your new credentials
+
+### Logging Out
+- Click the **"Logout"** button in the top navigation bar to end your session
+- You'll be redirected to the login page
+
 ## How It Works
-1. A user enters a river reading through the registration form.
-2. The Flask backend validates the input.
-3. The system computes derived values such as alert level, trend, and delta from the previous reading.
-4. The data is saved into SQLite.
-5. The dashboard displays the stored readings in a user-friendly format.
+1. **User logs in** with their credentials on the login page
+2. Upon successful authentication, user is granted access to the dashboard and registration forms
+3. A user enters a river reading through the registration form
+4. The Flask backend validates the input
+5. The system computes derived values such as alert level, trend, and delta from the previous reading
+6. The data is saved into SQLite
+7. The dashboard displays the stored readings in a user-friendly format, ordered by alert urgency
 
 ## Alert Logic
 - Safe: water level below 1.5 meters
@@ -69,8 +93,20 @@ It is designed as a demo application for learning, presentation, and prototyping
 - GET /api/readings: returns all stored readings as JSON
 - POST /api/simulate: inserts a simulated reading into the database
 
+## Database
+- User accounts and river readings are stored in SQLite (river_flood.db)
+- The database is created automatically on first run
+- Demo user (operator/flood2026) is pre-populated for testing
+- New user accounts are created on demand during signup
+
+## Security Notes
+- This is a prototype designed for assessment and learning purposes
+- For production use, implement proper password hashing (bcrypt/argon2)
+- Session data is managed using Flask sessions with a secret key
+- All protected routes require authentication
+
 ## Notes
 - This is a prototype and not connected to real hardware devices.
 - The local SQLite database file is created automatically when the app starts.
-- The project is ideal for demonstrating backend logic, data handling, and simple dashboard UI.
+- The project is ideal for demonstrating backend logic, data handling, authentication, and simple dashboard UI.
 

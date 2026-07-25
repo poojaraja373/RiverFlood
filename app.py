@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 import math
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+import os
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "river-flood-demo-key-2026")
 DB_PATH = Path(__file__).with_name("river_flood.db")
 
 
@@ -99,6 +101,15 @@ def init_db():
     conn = get_db()
     conn.execute(
         """
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+        """
+    )
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS readings (
             reading_id INTEGER PRIMARY KEY AUTOINCREMENT,
             location TEXT NOT NULL,
@@ -114,7 +125,14 @@ def init_db():
     )
     conn.commit()
 
-    count = conn.execute("SELECT COUNT(*) AS c FROM readings").fetchone()["c"]
+    user_count = conn.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
+    if user_count == 0:
+        conn.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            ("operator", "flood2026"),
+        )
+        conn.commit()
+
     conn.close()
 
 
@@ -124,12 +142,101 @@ def before_request():
         init_db()
 
 
+def login_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route("/")
 def index():
-    return redirect(url_for("dashboard"))
+    if "user_id" in session:
+        return redirect(url_for("dashboard"))
+    return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "").strip()
+        error = None
+
+        if not username:
+            error = "Username is required"
+        elif not password:
+            error = "Password is required"
+        else:
+            conn = get_db()
+            user = conn.execute(
+                "SELECT user_id, username FROM users WHERE username = ? AND password = ?",
+                (username, password),
+            ).fetchone()
+            conn.close()
+
+            if user:
+                session["user_id"] = user["user_id"]
+                session["username"] = user["username"]
+                return redirect(url_for("dashboard"))
+            else:
+                error = "Invalid username or password"
+
+        return render_template("login.html", error=error)
+
+    return render_template("login.html")
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "").strip()
+        confirm_password = (request.form.get("confirm_password") or "").strip()
+        error = None
+
+        if not username:
+            error = "Username is required"
+        elif len(username) < 3:
+            error = "Username must be at least 3 characters"
+        elif not password:
+            error = "Password is required"
+        elif len(password) < 6:
+            error = "Password must be at least 6 characters"
+        elif password != confirm_password:
+            error = "Passwords do not match"
+        else:
+            conn = get_db()
+            try:
+                conn.execute(
+                    "INSERT INTO users (username, password) VALUES (?, ?)",
+                    (username, password),
+                )
+                conn.commit()
+                conn.close()
+                return redirect(url_for("login"))
+            except sqlite3.IntegrityError:
+                error = "Username already exists"
+            finally:
+                conn.close()
+
+        return render_template("signup.html", error=error)
+
+    return render_template("signup.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     conn = get_db()
     rows = conn.execute(
@@ -137,10 +244,11 @@ def dashboard():
     ).fetchall()
     conn.close()
     ordered = order_readings(rows)
-    return render_template("dashboard.html", readings=ordered, count=len(ordered))
+    return render_template("dashboard.html", readings=ordered, count=len(ordered), username=session.get("username"))
 
 
 @app.route("/register", methods=["GET", "POST"])
+@login_required
 def register():
     if request.method == "POST":
         conn = get_db()
@@ -173,6 +281,7 @@ def register():
 
 
 @app.route("/api/readings")
+@login_required
 def api_readings():
     conn = get_db()
     rows = conn.execute("SELECT * FROM readings ORDER BY reading_id DESC").fetchall()
@@ -181,6 +290,7 @@ def api_readings():
 
 
 @app.route("/api/simulate", methods=["POST"])
+@login_required
 def simulate_reading():
     data = request.get_json() or {}
     location = (data.get("location") or "North Bank").strip() or "North Bank"

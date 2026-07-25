@@ -10,8 +10,12 @@
     <nav class="topbar">
       <h1>River Flood Early Warning System</h1>
       <div>
+        {% if session.get('username') %}
+        <span class="user-info">{{ session.get('username') }}</span>
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
         <a href="{{ url_for('register') }}">Register Reading</a>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        {% endif %}
       </div>
     </nav>
     <main>
