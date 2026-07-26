@@ -36,6 +36,14 @@
           <li>Password: min 6 characters</li>
         </ul>
       </div>
+      <div class="video-demo">
+        <h2>Demo Video</h2>
+        <video controls preload="metadata">
+          <source src="{{ url_for('static', filename='riverflood.mp4') }}" type="video/mp4">
+          Your browser does not support HTML5 video. Add a <code>static/riverflood.mp4</code> file or update the source in the template.
+        </video>
+        <p>See a quick walkthrough of the River Flood system before signing up.</p>
+      </div>
       <form method="post">
         <div class="form-group">
           <label for="username">Username</label>

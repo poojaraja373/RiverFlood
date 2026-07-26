@@ -36,6 +36,14 @@
         </div>
         <button type="submit">Login</button>
       </form>
+      <div class="video-demo">
+        <h2>Demo Video</h2>
+        <video controls preload="metadata">
+          <source src="{{ url_for('static', filename='riverflood.mp4') }}" type="video/mp4">
+          Your browser does not support HTML5 video. Add a <code>static/riverflood.mp4</code> file or update the source in the template.
+        </video>
+        <p>Watch the feature walkthrough before logging in.</p>
+      </div>
       <p class="info">Demo credentials:<br>Username: <strong>operator</strong><br>Password: <strong>flood2026</strong></p>
       <p style="text-align: center; margin-top: 20px; font-size: 14px;">
         Don't have an account? <a href="{{ url_for('signup') }}" style="color: #0f4c81; text-decoration: none;">Sign up here</a>
