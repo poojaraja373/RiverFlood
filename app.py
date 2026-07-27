@@ -244,7 +244,14 @@ def dashboard():
     ).fetchall()
     conn.close()
     ordered = order_readings(rows)
-    return render_template("dashboard.html", readings=ordered, count=len(ordered), username=session.get("username"))
+    latest_reading = rows[0] if rows else None
+    return render_template(
+        "dashboard.html",
+        readings=ordered,
+        count=len(ordered),
+        latest_reading=latest_reading,
+        username=session.get("username"),
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -302,7 +309,11 @@ def simulate_reading():
         return jsonify({"ok": False, "message": "Invalid water level"}), 400
 
     if not math.isfinite(level) or level < 0 or level > 12:
-        return jsonify({"ok": False, "message": "Water level must stay within 0 to 12m"}), 400
+        # Ignore faulty sensor data completely: do not store it and do not create an alert.
+        return jsonify({
+            "ok": False,
+            "message": "Sensor fault: reading ignored. Valid range is 0 to 12 m; no alert was raised.",
+        }), 400
 
     conn = get_db()
     previous_row = conn.execute(
@@ -329,7 +340,13 @@ def simulate_reading():
     )
     conn.commit()
     conn.close()
-    return jsonify({"ok": True, "message": "Simulated reading stored"})
+    return jsonify({
+        "ok": True,
+        "message": "Simulated reading stored",
+        "level": level,
+        "delta_m": delta,
+        "derived_status": derived_status,
+    })
 
 
 if __name__ == "__main__":

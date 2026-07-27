@@ -11,7 +11,12 @@ main { padding:24px; }
 .big-number { font-size:32px; font-weight:bold; color:#0f4c81; margin:0; }
 .controls { display:flex; gap:12px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
 .controls input, .controls select, form input, form select { padding:10px; border:1px solid #b7c7d6; border-radius:8px; min-width:180px; }
+.controls label { font-weight:bold; font-size:14px; }
 button { background:#0f4c81; color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
+.fault-btn { background:#6b3d00; }
+.simulation-message { min-height:20px; margin:0 0 16px; font-weight:bold; }
+.simulation-message.fault { color:#a40000; }
+.simulation-message.success { color:#087830; }
 .table-wrap { overflow:auto; }
 table { width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; }
 th, td { padding:12px; border-bottom:1px solid #e4ebf2; text-align:left; }

@@ -9,6 +9,17 @@
     <h3>Records shown</h3>
     <p class="big-number">{{ count }}</p>
   </div>
+  <div class="card status-card">
+    <h3>Latest level change</h3>
+    <p class="big-number">
+      {% if latest_reading and latest_reading.delta_m is not none %}
+        {{ '%+.2f'|format(latest_reading.delta_m) }} m
+      {% else %}
+        --
+      {% endif %}
+    </p>
+    <small>Compared with the previous reading</small>
+  </div>
 </section>
 
 <section class="controls">
@@ -20,8 +31,12 @@
     <option value="Danger">Danger</option>
     <option value="Unknown">Unknown</option>
   </select>
-  <button id="simulateBtn">Simulate Node Reading</button>
+  <label for="simulatedLevel">Simulated level (m)</label>
+  <input id="simulatedLevel" type="number" min="0" max="12" step="0.1" value="2.1" />
+  <button id="simulateBtn">Send Simulated Reading</button>
+  <button id="brokenSensorBtn" class="fault-btn">Test Broken Sensor (15 m)</button>
 </section>
+<p id="simulationMessage" class="simulation-message" role="status"></p>
 
 <section class="table-wrap">
   <table id="readingsTable">
@@ -29,6 +44,7 @@
       <tr>
         <th>Location</th>
         <th>Level (m)</th>
+        <th>Change (m)</th>
         <th>Status</th>
         <th>Trend</th>
         <th>Device</th>
@@ -40,6 +56,7 @@
       <tr>
         <td>{{ reading.location }}</td>
         <td>{{ reading.water_level_m }}</td>
+        <td>{% if reading.delta_m is not none %}{{ '%+.2f'|format(reading.delta_m) }}{% else %}--{% endif %}</td>
         <td>{{ reading.derived_status }}</td>
         <td>{{ reading.trend }}</td>
         <td>{{ reading.device_id }}</td>
@@ -47,7 +64,7 @@
       </tr>
       {% else %}
       <tr>
-        <td colspan="6">No readings yet. Register the first reading or simulate a node reading.</td>
+        <td colspan="7">No readings yet. Register the first reading or simulate a node reading.</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -73,12 +90,27 @@
   searchInput.addEventListener('input', filterRows);
   statusFilter.addEventListener('change', filterRows);
 
-  document.getElementById('simulateBtn').addEventListener('click', async () => {
-    const res = await fetch('/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'North Bank', device_id: 'NODE-01', water_level_m: 2.1 }) });
+  const simulationMessage = document.getElementById('simulationMessage');
+
+  async function sendSimulation(level) {
+    const res = await fetch('/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'North Bank', device_id: 'NODE-01', water_level_m: level }) });
     const data = await res.json();
     if (data.ok) {
+      simulationMessage.className = 'simulation-message success';
+      simulationMessage.textContent = `Stored ${data.level} m. Computed change: ${data.delta_m === null ? '--' : `${data.delta_m >= 0 ? '+' : ''}${data.delta_m.toFixed(2)} m`}.`;
       window.location.reload();
+    } else {
+      simulationMessage.className = 'simulation-message fault';
+      simulationMessage.textContent = data.message;
     }
+  }
+
+  document.getElementById('simulateBtn').addEventListener('click', () => {
+    sendSimulation(document.getElementById('simulatedLevel').value);
+  });
+
+  document.getElementById('brokenSensorBtn').addEventListener('click', () => {
+    sendSimulation(15);
   });
 </script>
 {% endblock %}
